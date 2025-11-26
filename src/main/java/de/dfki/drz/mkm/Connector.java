@@ -27,10 +27,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
-import de.dfki.mlt.drz.eurocommand_api.model.MissionResourceRestApiContract;
+import de.dfki.mlt.drz.fraunhofer_api.ApiClient;
 import de.dfki.mlt.drz.fraunhofer_api.ApiException;
+import de.dfki.mlt.drz.fraunhofer_api.Configuration;
 import de.dfki.mlt.drz.fraunhofer_api.api.DefaultApi;
 import de.dfki.mlt.drz.fraunhofer_api.model.RadioMessage;
+
 import de.dfki.mlt.mqtt.MqttHandler;
 
 public class Connector implements Runnable {
@@ -48,11 +50,19 @@ public class Connector implements Runnable {
   private Thread proc;
   private BlockingQueue<JsonNode> queue;
 
-  private static final DefaultApi api = new DefaultApi();
+  // provided credentials
+  final String USER = "development";
+  final String PASSWORD = "LookMomNoVPN!";
+  
+  final String BASE_URL_ROBLW = "http://10.26.2.42:8080/radio-transcription";
+  final String BASE_URL_IAIS = "https://eve.iais.fraunhofer.de/radio-transcription";
+
+  
+  private static DefaultApi api;
   //private static final SimpleDateFormat sdf =
   //    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
-  EuroCommandClient ECclient = new EuroCommandClient();
+  //EuroCommandClient ECclient = new EuroCommandClient();
   UUID missionId;
 
 
@@ -65,12 +75,21 @@ public class Connector implements Runnable {
     //client.register(STRING_TOPIC, this::receiveString);
  }
 
-  private void initIAISApi() {
-    api.setCustomBaseUrl("http://10.26.2.42:8080/radio-transcription");
-    api.getApiClient().setUsername("development");
-    api.getApiClient().setPassword("LookMomNoVPN!");
+  private void initIAISApi(Map<String, Object> configs) {
+    String url = BASE_URL_ROBLW;
+    if (configs.containsKey("backend_url")) {
+      url = (String) configs.get("backend_url");
+    }
+
+    ApiClient apiClient = Configuration.getDefaultApiClient();
+    apiClient.setUsername(USER);
+    apiClient.setPassword(PASSWORD);
+    
+    api = new DefaultApi();
+    api.setCustomBaseUrl(url);
   }
 
+  /*
   private void initECApi() {
     try {
       List<MissionResourceRestApiContract> missionResources =
@@ -82,18 +101,20 @@ public class Connector implements Runnable {
       missionId = null;
     }
   }
+  */
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public void init(Map configs)
     throws IOException, MqttException {
     initMqtt(configs);
+    initIAISApi(configs);
+
     // start processing thread
     isRunning = true;
     proc = new Thread(this);
     proc.setDaemon(true);
     proc.start();
-    initIAISApi();
-    initECApi();
+    //initECApi();
   }
 
   public void shutdown() {
@@ -173,8 +194,24 @@ public class Connector implements Runnable {
     } catch (ApiException e) {
       logger.error("Sending Message failed: {}", e.getMessage());
     }
+    getMessagesFromIAIS(fromTime, toTime);
   }
 
+  protected void getMessagesFromIAIS(long from, long to) {
+    OffsetDateTime startTime = toODT(from);
+    OffsetDateTime endTime = toODT(to);
+    try {
+      List<RadioMessage> response = api.getTranscriptionsGet(startTime, endTime);
+      System.out.println("found " + response.size() + " results");
+      for (RadioMessage m : response) {
+        System.out.println(m);
+      }
+    } catch (ApiException e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  /*
   protected void sendMessageToEC(String sender, String receiver,
       String message, long fromTime, long toTime) {
     try {
@@ -183,6 +220,7 @@ public class Connector implements Runnable {
       logger.error("EC sending: {}", ex);
     }
   }
+  */
 
   /** node also has slots id, intent, frame
    */
@@ -193,7 +231,7 @@ public class Connector implements Runnable {
     long fromTime = node.get("fromTime").asLong();
     long toTime = node.get("toTime").asLong();
     sendMessageToIAIS(sender, addressee, text, fromTime, toTime);
-    sendMessageToEC(sender, addressee, text, fromTime, toTime);
+    //sendMessageToEC(sender, addressee, text, fromTime, toTime);
   }
 
   public void run() {

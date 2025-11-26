@@ -36,15 +36,15 @@
       <dependency>
         <groupId>de.dfki.mlt.drz</groupId>
         <artifactId>fraunhofer-openapi</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
       </dependency>
-
+      <!--
       <dependency>
         <groupId>de.dfki.mlt.drz</groupId>
         <artifactId>eurocommand-openapi</artifactId>
         <version>1.0.0</version>
       </dependency>
-
+      -->
       <!-- Remove once the former work
       <dependency>
         <groupId>com.squareup.okhttp3</groupId>

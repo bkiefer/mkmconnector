@@ -1,0 +1,19 @@
+networks:
+  host:
+    # Specify driver options
+    driver: bridge
+
+include:
+  - ../mkm/docker-compose.yml  #with serviceB declared
+
+services:
+  mkmconnector:
+    depends_on:
+      - mkm
+    container-name: 'mkmconnector'
+    hostname: 'mkmconnector'
+    networks:
+      - host
+    volumes:
+      - ./configs/config-docker.yml:/app/config.yml:ro
+      - ../mkm/logs/mkmconnector:/app/logs
