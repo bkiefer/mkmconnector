@@ -1,0 +1,4 @@
+iais:
+  #port: 9883
+  #base_url: 'http://10.26.2.42:8080/radio-transcription'
+  base_url: 'https://eve.iais.fraunhofer.de/radio-transcription'

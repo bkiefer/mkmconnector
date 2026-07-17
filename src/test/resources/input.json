@@ -1,0 +1,12 @@
+{"addressee":"Zugfuehrer",
+ "sender":"Gruppenfuehrer",
+ "fromTime":"\"1782919424851\"^^<xsd:long>",
+ "toTime":"\"1782919430682\"^^<xsd:long>",
+ "id":"microphone_1782919424851",
+ "text":"Angriffstrupp mit der Drehleiter zur Rettung verletzter Personen in den ersten Stock.",
+ "intent":"Inform",
+ "frame":"top",
+ "einheit":["Angriffstrupp"],
+ "weg":["ersten"],
+ "mittel":["mit der Drehleiter"],
+ "ziel":["verletzter","in den ersten Stock"]}

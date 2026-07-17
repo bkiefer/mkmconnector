@@ -1,6 +1,6 @@
-mqtt:
-  host: host.docker.internal # running in isolated docker
-  #port: 9883
+#mqtt:
+#  host: host.docker.internal # running in isolated docker
+#  port: 9883
 
 iais:
   #base_url: 'https://10.26.2.42:8080/radio-transcription'
