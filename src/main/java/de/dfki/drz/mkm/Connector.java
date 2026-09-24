@@ -256,6 +256,7 @@ public class Connector implements Runnable {
       logger.error("Converting JsonNode failed: {}", ex.getMessage());
     }
 
+    logger.warn("Sending {} to {}", jsonPayload, url.toString());    
     // Create the Request Body
     // In OkHttp 4+, the parameter order is (String content, MediaType
     // contentType)
@@ -374,7 +375,11 @@ public class Connector implements Runnable {
   @Override
   public void run() {
     while (isRunning) {
-      JsonNode n = queue.poll();
+      JsonNode n = null;
+      try {
+        n = queue.take();
+      } catch (InterruptedException e) {
+      }
       if (n != null) {
         sendFusion(n);
       }
