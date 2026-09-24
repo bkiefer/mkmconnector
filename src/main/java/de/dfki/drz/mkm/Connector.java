@@ -378,11 +378,10 @@ public class Connector implements Runnable {
       JsonNode n = null;
       try {
         n = queue.take();
-      } catch (InterruptedException e) {
-      }
-      if (n != null) {
-        sendFusion(n);
-      }
+        if (n != null) {
+          sendFusion(n);
+        }
+      } catch (InterruptedException e) { }
     }
   }
 
